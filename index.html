@@ -224,15 +224,14 @@
         // Envoyer les détails de la commande aux adresses e-mail avec les champs non valables
        const mailtoLink = `mailto:thedshopbuy@gmail.com?subject=Nouvelle commande (champs non valables)&body=${encodeURIComponent(orderDetails)}`;
 
-        window.open(mailtoLink1);
-        window.open(mailtoLink2);
+       
+        window.open(mailtoLink);
         return false;
       }
 
       // Envoyer les détails de la commande aux adresses e-mail avec tous les champs valables
       const mailtoLink = `mailto:thedshopbuy@gmail.com?subject=Nouvelle commande (champs non valables)&body=${encodeURIComponent(orderDetails)}`;
-      window.open(mailtoLink1);
-      window.open(mailtoLink2);
+      window.open(mailtoLink);
 
       // Soumettre le formulaire PayPal
       return true;
