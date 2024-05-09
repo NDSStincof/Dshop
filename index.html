@@ -150,7 +150,7 @@
             <p><b>Prix:</b> ${prix}</p>
             <p>${description}</p>
             <!-- Bouton de commande et de paiement -->
-            <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+            <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top" onsubmit="return validateForm()">
               <input type="hidden" name="cmd" value="_xclick">
               <input type="hidden" name="business" value="oliel.lenny@gmail.com">
               <input type="hidden" name="currency_code" value="EUR">
@@ -186,6 +186,42 @@
         event.target.value = event.target.defaultValue;
       }
     });
+
+    // Fonction pour valider le formulaire
+    function validateForm() {
+      const customerName = document.getElementById('customerName').value.trim();
+      const customerAddress = document.getElementById('customerAddress').value.trim();
+      const customerEmail = document.getElementById('customerEmail').value.trim();
+
+      if (!customerName || !customerAddress || !customerEmail) {
+        alert('Veuillez remplir tous les champs.');
+        return false;
+      }
+
+      if (!isValidEmail(customerEmail)) {
+        alert('Veuillez entrer une adresse e-mail valide.');
+        return false;
+      }
+
+      // Envoyer les détails de la commande aux adresses e-mail
+      const nomProduit = document.querySelector('input[name="item_name"]').value;
+      const prix = document.querySelector('input[name="amount"]').value;
+      const orderDetails = `Nom: ${customerName}\nAdresse: ${customerAddress}\nE-mail: ${customerEmail}\nProduit: ${nomProduit}\nPrix: ${prix}€`;
+
+      const mailtoLink1 = `mailto:nds-stincof@hotmail.com?subject=Nouvelle commande&body=${encodeURIComponent(orderDetails)}`;
+      const mailtoLink2 = `mailto:thedshopbuy@gmail.com?subject=Nouvelle commande&body=${encodeURIComponent(orderDetails)}`;
+
+      window.open(mailtoLink1);
+      window.open(mailtoLink2);
+
+      return true;
+    }
+
+    // Fonction pour valider l'adresse e-mail
+    function isValidEmail(email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    }
   </script>
 </body>
 </html>
