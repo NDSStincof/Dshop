@@ -76,6 +76,20 @@
     .article-details-info {
       text-align: left;
     }
+
+    .order-button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .order-button:hover {
+      background-color: #45a049;
+    }
   </style>
 </head>
 <body>
@@ -135,23 +149,18 @@
             <h2>${nomProduit}</h2>
             <p><b>Prix:</b> ${prix}</p>
             <p>${description}</p>
-            <!-- Bouton PayPal -->
+            <!-- Bouton de commande et de paiement -->
             <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
               <input type="hidden" name="cmd" value="_xclick">
               <input type="hidden" name="business" value="seynabou.diallo@fr.pwc.com">
               <input type="hidden" name="currency_code" value="EUR">
-              <input type="image" src="https://www.paypalobjects.com/fr_FR/FR/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="Faire un paiement via PayPal">
-              <img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
-            </form>
-            <!-- Formulaire de commande -->
-            <form id="orderForm">
-              <label for="customerName">Nom :</label>
-              <input type="text" id="customerName" name="customerName" required>
+              <input type="hidden" name="item_name" value="${nomProduit}">
+              <input type="hidden" name="amount" value="${prix.replace('€', '')}">
+              <label for="customerName">Nom et prénom :</label>
+              <input type="text" id="customerName" name="name" required>
               <label for="customerAddress">Adresse de livraison :</label>
-              <input type="text" id="customerAddress" name="customerAddress" required>
-              <input type="hidden" id="productName" name="productName" value="${nomProduit}">
-              <input type="hidden" id="productPrice" name="productPrice" value="${prix}">
-              <button type="button" onclick="submitOrder()">Passer la commande</button>
+              <input type="text" id="customerAddress" name="address" required>
+              <button type="submit" class="order-button">Commander et payer</button>
             </form>
           </div>
         </div>
@@ -168,18 +177,6 @@
     articlesContainer.appendChild(generateArticle("Spiderman Webshooter", "49.99€", "spiderman_webshooter_image1.jpeg", "Do you like Spiderman? Here is his Webshooter which launches real projectiles <br> Aimez-vous Spiderman? Voici son Webshooter qui lance de vrais projectiles <br> Color : black / couleur : noir"));
     articlesContainer.appendChild(generateArticle("Submachine water gun", "49.99€", "submachine_water_gun.jpeg", "Here is an assault rifle for the best water fights between friends <br> Voici un fusil d'assaut pour les meilleurs batailles d'eau entre amis <br> The battery and its charger are included <br> La batterie et son chargeur sont inclus"));
     articlesContainer.appendChild(generateArticle("Balle météore rebondissante ", "4.99€", "Balle_météore_rebondissante.png", ""));
-
-    function submitOrder() {
-      const customerName = document.getElementById('customerName').value;
-      const customerAddress = document.getElementById('customerAddress').value;
-      const productName = document.getElementById('productName').value;
-      const productPrice = document.getElementById('productPrice').value;
-
-      const orderDetails = `Nom: ${customerName}\nAdresse: ${customerAddress}\nProduit: ${productName}\nPrix: ${productPrice}`;
-
-      const mailtoLink = `mailto:nds-stincof@hotmail.com?subject=Nouvelle commande&body=${encodeURIComponent(orderDetails)}`;
-      window.open(mailtoLink);
-    }
   </script>
 </body>
 </html>
