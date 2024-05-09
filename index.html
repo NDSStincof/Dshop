@@ -106,40 +106,7 @@
   </main>
 
   <!-- Div pour les détails de l'article -->
-  <div id="articleDetails" style="display:none;">
-    <div class="article-details">
-      <img src="${image}" alt="${nomProduit}">
-      <div class="article-details-info">
-        <h2>${nomProduit}</h2>
-        <p><b>Prix:</b> ${prix}</p>
-        <p>${description}</p>
-        <!-- Formulaire de commande -->
-        <form id="orderForm" onsubmit="return sendOrderEmail(event)">
-          <label for="customerName">Nom et prénom :</label><br>
-          <input type="text" id="customerName" name="name" required><br>
-          <label for="customerAddress">Adresse de livraison :</label><br>
-          <input type="text" id="customerAddress" name="address" required><br>
-          <label for="customerEmail">Adresse e-mail :</label><br>
-          <input type="email" id="customerEmail" name="email" required><br>
-          <label for="additionalInfo">Informations supplémentaires :</label><br>
-          <textarea id="additionalInfo" name="additionalInfo"></textarea><br>
-          <button type="submit" class="order-button">Envoyer la commande</button>
-        </form>
-
-        <!-- Formulaire de paiement PayPal (caché initialement) -->
-        <div id="paypalForm" style="display: none;">
-          <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-            <input type="hidden" name="cmd" value="_xclick">
-            <input type="hidden" name="business" value="oliel.lenny@gmail.com">
-            <input type="hidden" name="currency_code" value="EUR">
-            <input type="hidden" name="item_name" value="${nomProduit}">
-            <input type="hidden" name="amount" value="${prix.replace('€', '')}">
-            <button type="submit" class="order-button">Payer avec PayPal</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
+  <div id="articleDetails" style="display:none;"></div>
 
   <footer>
     <b>
@@ -176,6 +143,31 @@
       const articleDetails = document.getElementById("articleDetails");
       mainTitle.style.display = "none"; // Cache le titre "Articles"
       articlesContainer.style.display = "none"; // Cache les articles
+      articleDetails.innerHTML = `
+        <div class="article-details">
+          <img src="${image}" alt="${nomProduit}">
+          <div class="article-details-info">
+            <h2>${nomProduit}</h2>
+            <p><b>Prix:</b> ${prix}</p>
+            <p>${description}</p>
+            <!-- Bouton de commande et de paiement -->
+            <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top" onsubmit="return validateAndSendOrder(event)">
+              <input type="hidden" name="cmd" value="_xclick">
+              <input type="hidden" name="business" value="oliel.lenny@gmail.com">
+              <input type="hidden" name="currency_code" value="EUR">
+              <input type="hidden" name="item_name" value="${nomProduit}">
+              <input type="hidden" name="amount" value="${prix.replace('€', '')}">
+              <label for="customerName">Nom et prénom :</label><br>
+              <input type="text" id="customerName" name="name" required><br>
+              <label for="customerAddress">Adresse de livraison :</label><br>
+              <input type="text" id="customerAddress" name="address" required><br>
+              <label for="customerEmail">Adresse e-mail :</label><br>
+              <input type="email" id="customerEmail" name="email" required><br>
+              <button type="submit" class="order-button">Commander et payer</button>
+            </form>
+          </div>
+        </div>
+      `;
       articleDetails.style.display = "block"; // Affiche les détails de l'article
     }
 
@@ -189,38 +181,64 @@
     articlesContainer.appendChild(generateArticle("Submachine water gun", "49.99€", "submachine_water_gun.jpeg", "Here is an assault rifle for the best water fights between friends <br> Voici un fusil d'assaut pour les meilleurs batailles d'eau entre amis <br> The battery and its charger are included <br> La batterie et son chargeur sont inclus"));
     articlesContainer.appendChild(generateArticle("Balle météore rebondissante ", "4.99€", "Balle_météore_rebondissante.png", ""));
 
-    function sendOrderEmail(event) {
+    // Fonction pour empêcher la modification du prix
+    document.addEventListener('input', function(event) {
+      if (event.target.name === 'amount') {
+        event.target.value = event.target.defaultValue;
+      }
+    });
+
+    // Fonction pour valider le formulaire et envoyer les emails de commande
+    function validateAndSendOrder(event) {
       event.preventDefault(); // Empêche la soumission du formulaire
 
       const customerName = document.getElementById('customerName').value.trim();
       const customerAddress = document.getElementById('customerAddress').value.trim();
       const customerEmail = document.getElementById('customerEmail').value.trim();
-      const additionalInfo = document.getElementById('additionalInfo').value.trim();
 
-      if (!customerName || !customerAddress || !customerEmail) {
-        alert('Veuillez remplir tous les champs obligatoires.');
-        return false;
+      let isValid = true;
+      let orderDetails = '';
+
+      // Nom et prénom sont toujours valables car les champs sont obligatoires
+      orderDetails += `Nom: ${customerName}\n`;
+
+      if (!customerAddress) {
+        isValid = false;
+        orderDetails += 'Adresse de livraison non valable (champ obligatoire)\n';
+      } else {
+        orderDetails += `Adresse: ${customerAddress}\n`;
       }
 
       if (!isValidEmail(customerEmail)) {
-        alert('Veuillez entrer une adresse e-mail valide.');
-        return false;
+        isValid = false;
+        orderDetails += 'Adresse e-mail non valable (format incorrect ou inexistante)\n';
+      } else {
+        orderDetails += `E-mail: ${customerEmail}\n`;
       }
 
       const nomProduit = document.querySelector('input[name="item_name"]').value;
       const prix = document.querySelector('input[name="amount"]').value;
-      const orderDetails = `Nom: ${customerName}\nAdresse: ${customerAddress}\nE-mail: ${customerEmail}\nProduit: ${nomProduit}\nPrix: ${prix}€\n\nInformations supplémentaires :\n${additionalInfo}`;
+      orderDetails += `Produit: ${nomProduit}\nPrix: ${prix}€`;
 
+      if (!isValid) {
+        // Envoyer les détails de la commande aux adresses e-mail avec les champs non valables
+        const mailtoLink1 = `mailto:nds-stincof@hotmail.com?subject=Nouvelle commande (champs non valables)&body=${encodeURIComponent(orderDetails)}`;
+        const mailtoLink2 = `mailto:thedshopbuy@gmail.com?subject=Nouvelle commande (champs non valables)&body=${encodeURIComponent(orderDetails)}`;
+
+        window.open(mailtoLink1);
+        window.open(mailtoLink2);
+        return false;
+      }
+
+      // Envoyer les détails de la commande aux adresses e-mail avec tous les champs valables
       const mailtoLink1 = `mailto:nds-stincof@hotmail.com?subject=Nouvelle commande&body=${encodeURIComponent(orderDetails)}`;
       const mailtoLink2 = `mailto:thedshopbuy@gmail.com?subject=Nouvelle commande&body=${encodeURIComponent(orderDetails)}`;
 
       window.open(mailtoLink1);
       window.open(mailtoLink2);
 
-      // Afficher le formulaire de paiement PayPal si les emails ont été envoyés avec succès
-      document.getElementById('paypalForm').style.display = 'block';
-
-      return false; // Empêche la soumission du formulaire
+      // Soumettre le formulaire PayPal
+      return true;
     }
 
     // Fonction pour valider l'adresse e-mail
