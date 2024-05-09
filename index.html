@@ -6,14 +6,101 @@
   <shortcut icon="Dshop.png"/>
   <title>Dshop</title>
   <style>
-    /* Styles CSS */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    header, footer {
+      background-color: #74eaec;
+      color: #ffffff;
+      text-align: center;
+    }
+
+    footer {
+      margin-bottom: 0;
+    }
+
+    header .logo {
+      height: 70px;
+      width: 70px;
+      float: left;
+      margin-left: 5px;
+      margin-top: 0px;
+      vertical-align: middle;
+    }
+
+    main {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      padding: 20px;
+    }
+
+    .article {
+      width: calc(33.33% - 20px);
+      max-width: 290px;
+      background-color: #f0f0f0;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      margin: 20px;
+      cursor: pointer;
+    }
+
+    .article img {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      max-width: 150px;
+    }
+
+    .article-info {
+      padding: 10px;
+    }
+
+    .article-details {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .article-details img {
+      max-width: 400px;
+      margin-right: 20px;
+    }
+
+    .article-details-info {
+      text-align: left;
+    }
+
+    .order-button {
+      background-color: #3498db;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+
+    .order-button:hover {
+      background-color: #2980b9;
+    }
   </style>
 </head>
 <body>
   <header>
-    <!-- En-tête -->
+    <a href="index.html">
+      <img src="Dshop.jpeg" class="logo">
+    </a>
+    <h2>Boutique en ligne Dshop 🇫🇷</h2>
   </header>
-
+  <br><h1 id="mainTitle" align="center"><b>Articles</b></h1><br><br>
   <main id="articlesContainer">
     <!-- Articles générés dynamiquement -->
   </main>
@@ -22,7 +109,10 @@
   <div id="articleDetails" style="display:none;"></div>
 
   <footer>
-    <!-- Pied de page -->
+    <b>
+      <p>Copyright © 2024 - All Rights Reserved</p>
+      <p>Site par Stincof NDS & Fern</p>
+    </b>
   </footer>
 
   <!-- Script PayPal SDK -->
@@ -54,7 +144,6 @@
       mainTitle.style.display = "none"; // Cache le titre "Articles"
       articlesContainer.style.display = "none"; // Cache les articles
 
-      // Créer le contenu de la div articleDetails
       const articleDetailsContent = `
         <div class="article-details">
           <img src="${image}" alt="${nomProduit}">
@@ -63,7 +152,7 @@
             <p><b>Prix:</b> ${prix}</p>
             <p>${description}</p>
             <!-- Formulaire de commande -->
-            <form id="orderForm" onsubmit="return sendOrderEmail(event, '${nomProduit}', '${prix}')">
+            <form id="orderForm" onsubmit="return sendOrderEmail(event)">
               <label for="customerName">Nom et prénom :</label><br>
               <input type="text" id="customerName" name="name" required><br>
               <label for="customerAddress">Adresse de livraison :</label><br>
@@ -92,7 +181,7 @@
     articlesContainer.appendChild(generateArticle("Submachine water gun", "49.99€", "submachine_water_gun.jpeg", "Here is an assault rifle for the best water fights between friends <br> Voici un fusil d'assaut pour les meilleurs batailles d'eau entre amis <br> The battery and its charger are included <br> La batterie et son chargeur sont inclus"));
     articlesContainer.appendChild(generateArticle("Balle météore rebondissante ", "4.99€", "Balle_météore_rebondissante.png", ""));
 
-    function sendOrderEmail(event, nomProduit, prix) {
+    function sendOrderEmail(event) {
       event.preventDefault(); // Empêche la soumission du formulaire
 
       const customerName = document.getElementById('customerName').value.trim();
@@ -110,6 +199,8 @@
         return false;
       }
 
+      const nomProduit = document.querySelector('input[name="item_name"]').value;
+      const prix = document.querySelector('input[name="amount"]').value;
       const orderDetails = `Nom: ${customerName}\nAdresse: ${customerAddress}\nE-mail: ${customerEmail}\nProduit: ${nomProduit}\nPrix: ${prix}€\n\nInformations supplémentaires :\n${additionalInfo}`;
 
       const mailtoLink1 = `mailto:nds-stincof@hotmail.com?subject=Nouvelle commande&body=${encodeURIComponent(orderDetails)}`;
