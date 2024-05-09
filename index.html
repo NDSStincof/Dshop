@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <shortcut icon="Dshop.png"/>
   <title>Dshop</title>
   <style>
@@ -16,6 +16,7 @@
       background-color: #74eaec;
       color: #ffffff;
       text-align: center;
+      padding: 10px;
     }
 
     footer {
@@ -23,8 +24,8 @@
     }
 
     header .logo {
-      height: 70px;
-      width: 70px;
+      height: 50px;
+      width: 50px;
       float: left;
       margin-left: 5px;
       margin-top: 0px;
@@ -34,12 +35,12 @@
     main {
       display: flex;
       flex-wrap: wrap;
-      justify-content: space-between;
+      justify-content: space-around;
       padding: 20px;
     }
 
     .article {
-      width: calc(33.33% - 20px);
+      width: 100%;
       max-width: 290px;
       background-color: #f0f0f0;
       padding: 10px;
@@ -63,18 +64,19 @@
 
     .article-details {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
       padding: 20px;
     }
 
     .article-details img {
-      max-width: 400px;
-      margin-right: 20px;
+      max-width: 100%;
+      margin-bottom: 20px;
     }
 
     .article-details-info {
       text-align: left;
+      width: 100%;
     }
 
     .order-button {
@@ -89,6 +91,18 @@
 
     .order-button:hover {
       background-color: #45a049;
+    }
+
+    @media (max-width: 768px) {
+      .article-details {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .article-details img {
+        margin-right: 0;
+        margin-bottom: 20px;
+      }
     }
   </style>
 </head>
@@ -156,12 +170,12 @@
               <input type="hidden" name="currency_code" value="EUR">
               <input type="hidden" name="item_name" value="${nomProduit}">
               <input type="hidden" name="amount" value="${prix.replace('€', '')}">
-              <label for="customerName">Nom et prénom :</label>
-              <input type="text" id="customerName" name="name" required>
-              <label for="customerAddress">Adresse de livraison :</label>
-              <input type="text" id="customerAddress" name="address" required>
-              <label for="customerEmail">Adresse e-mail :</label>
-              <input type="email" id="customerEmail" name="email" required>
+              <label for="customerName">Nom et prénom :</label><br>
+              <input type="text" id="customerName" name="name" required><br>
+              <label for="customerAddress">Adresse de livraison :</label><br>
+              <input type="text" id="customerAddress" name="address" required><br>
+              <label for="customerEmail">Adresse e-mail :</label><br>
+              <input type="email" id="customerEmail" name="email" required><br>
               <button type="submit" class="order-button">Commander et payer</button>
             </form>
           </div>
@@ -193,34 +207,53 @@
       const customerAddress = document.getElementById('customerAddress').value.trim();
       const customerEmail = document.getElementById('customerEmail').value.trim();
 
+      let isValid = true;
+      let orderDetails = '';
+
       if (!customerName || !customerAddress || !customerEmail) {
-        alert('Veuillez remplir tous les champs.');
-        return false;
+        isValid = false;
+        orderDetails += 'Veuillez remplir tous les champs.\n';
       }
 
       if (!isValidEmail(customerEmail)) {
-        alert('Veuillez entrer une adresse e-mail valide.');
-        return false;
+        isValid = false;
+        orderDetails += 'Veuillez entrer une adresse e-mail valide.\n';
       }
 
-      // Envoyer les détails de la commande aux adresses e-mail
-      const nomProduit = document.querySelector('input[name="item_name"]').value;
-      const prix = document.querySelector('input[name="amount"]').value;
-      const orderDetails = `Nom: ${customerName}\nAdresse: ${customerAddress}\nE-mail: ${customerEmail}\nProduit: ${nomProduit}\nPrix: ${prix}€`;
+      if (!isValidAddress(customerAddress)) {
+        isValid = false;
+        orderDetails += 'Veuillez entrer une adresse valide.\n';
+      }
 
-      const mailtoLink1 = `mailto:nds-stincof@hotmail.com?subject=Nouvelle commande&body=${encodeURIComponent(orderDetails)}`;
-      const mailtoLink2 = `mailto:thedshopbuy@gmail.com?subject=Nouvelle commande&body=${encodeURIComponent(orderDetails)}`;
+      if (isValid) {
+        // Envoyer les détails de la commande aux adresses e-mail
+        const nomProduit = document.querySelector('input[name="item_name"]').value;
+        const prix = document.querySelector('input[name="amount"]').value;
+        orderDetails = `Nom: ${customerName}\nAdresse: ${customerAddress}\nE-mail: ${customerEmail}\nProduit: ${nomProduit}\nPrix: ${prix}€`;
 
-      window.open(mailtoLink1);
-      window.open(mailtoLink2);
+        const mailtoLink1 = `mailto:nds-stincof@hotmail.com?subject=Nouvelle commande&body=${encodeURIComponent(orderDetails)}`;
+        const mailtoLink2 = `mailto:thedshopbuy@gmail.com?subject=Nouvelle commande&body=${encodeURIComponent(orderDetails)}`;
 
-      return true;
+        window.open(mailtoLink1);
+        window.open(mailtoLink2);
+      } else {
+        alert(orderDetails);
+      }
+
+      return isValid;
     }
 
     // Fonction pour valider l'adresse e-mail
     function isValidEmail(email) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return emailRegex.test(email);
+    }
+
+    // Fonction pour valider l'adresse
+    function isValidAddress(address) {
+      // Vous pouvez ajouter ici votre logique de validation d'adresse
+      // Par exemple, vérifier si l'adresse contient des chiffres, des lettres, etc.
+      return address.trim().length > 0;
     }
   </script>
 </body>
