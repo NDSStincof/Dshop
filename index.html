@@ -222,16 +222,17 @@
 
       if (!isValid) {
         // Envoyer les détails de la commande aux adresses e-mail avec les champs non valables
-       const mailtoLink = `mailto:thedshopbuy@gmail.com?subject=Nouvelle commande (champs valables)&body=${encodeURIComponent(orderDetails)}`;
-       
+        const mailtoLink = `mailto:thedshopbuy@gmail.com?subject=Nouvelle commande (champs non valables)&body=${encodeURIComponent(orderDetails)}`;
         window.open(mailtoLink);
         return false;
       }
 
       // Envoyer les détails de la commande aux adresses e-mail avec tous les champs valables
-     const mailtoLink = `mailto:thedshopbuy@gmail.com?subject=Nouvelle commande (champs valables)&body=${encodeURIComponent(orderDetails)}`;
+      const mailtoLink = `mailto:thedshopbuy@gmail.com?subject=Nouvelle commande (champs valables)&body=${encodeURIComponent(orderDetails)}`;
+      window.open(mailtoLink);
 
-      // Soumettre le formulaire PayPal
+      // Soumettre le formulaire PayPal avec le prix non modifiable
+      document.querySelector('input[name="amount"]').value = prix.replace('€', '');
       return true;
     }
 
