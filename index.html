@@ -106,7 +106,40 @@
   </main>
 
   <!-- Div pour les détails de l'article -->
-  <div id="articleDetails" style="display:none;"></div>
+  <div id="articleDetails" style="display:none;">
+    <div class="article-details">
+      <img src="${image}" alt="${nomProduit}">
+      <div class="article-details-info">
+        <h2>${nomProduit}</h2>
+        <p><b>Prix:</b> ${prix}</p>
+        <p>${description}</p>
+        <!-- Formulaire de commande -->
+        <form id="orderForm" onsubmit="return sendOrderEmail(event)">
+          <label for="customerName">Nom et prénom :</label><br>
+          <input type="text" id="customerName" name="name" required><br>
+          <label for="customerAddress">Adresse de livraison :</label><br>
+          <input type="text" id="customerAddress" name="address" required><br>
+          <label for="customerEmail">Adresse e-mail :</label><br>
+          <input type="email" id="customerEmail" name="email" required><br>
+          <label for="additionalInfo">Informations supplémentaires :</label><br>
+          <textarea id="additionalInfo" name="additionalInfo"></textarea><br>
+          <button type="submit" class="order-button">Envoyer la commande</button>
+        </form>
+
+        <!-- Formulaire de paiement PayPal (caché initialement) -->
+        <div id="paypalForm" style="display: none;">
+          <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+            <input type="hidden" name="cmd" value="_xclick">
+            <input type="hidden" name="business" value="oliel.lenny@gmail.com">
+            <input type="hidden" name="currency_code" value="EUR">
+            <input type="hidden" name="item_name" value="${nomProduit}">
+            <input type="hidden" name="amount" value="${prix.replace('€', '')}">
+            <button type="submit" class="order-button">Payer avec PayPal</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <footer>
     <b>
@@ -117,7 +150,8 @@
 
   <!-- Script PayPal SDK -->
   <script src="https://www.paypal.com/sdk/js?client-id=ASW8iU6SRJ_929hu5D1Chlrq1wEn4hiDHnLFv0HoKgrJZVWDljbrY6UyfnCuj0Df0YAcrtN05TDONzWh"></script>
-<script>
+
+  <script>
     // Fonction pour générer les articles
     function generateArticle(nomProduit, prix, image, description) {
       const article = document.createElement('div');
@@ -142,23 +176,6 @@
       const articleDetails = document.getElementById("articleDetails");
       mainTitle.style.display = "none"; // Cache le titre "Articles"
       articlesContainer.style.display = "none"; // Cache les articles
-
-      const articleDetailsContent = `
-        <div class="article-details">
-          <img src="${image}" alt="${nomProduit}">
-          <div class="article-details-info">
-            <h2>${nomProduit}</h2>
-            <p><b>Prix:</b> ${prix}</p>
-            <p>${description}</p>
-            <!-- Formulaire de commande -->
-            <form id="orderForm" onsubmit="return sendOrderAndRedirect(event, '${nomProduit}', '${prix.replace('€', '')}')">
-              <button type="submit" class="order-button">Envoyer la commande</button>
-            </form>
-          </div>
-        </div>
-      `;
-
-      articleDetails.innerHTML = articleDetailsContent;
       articleDetails.style.display = "block"; // Affiche les détails de l'article
     }
 
@@ -172,10 +189,27 @@
     articlesContainer.appendChild(generateArticle("Submachine water gun", "49.99€", "submachine_water_gun.jpeg", "Here is an assault rifle for the best water fights between friends <br> Voici un fusil d'assaut pour les meilleurs batailles d'eau entre amis <br> The battery and its charger are included <br> La batterie et son chargeur sont inclus"));
     articlesContainer.appendChild(generateArticle("Balle météore rebondissante ", "4.99€", "Balle_météore_rebondissante.png", ""));
 
-    function sendOrderAndRedirect(event, nomProduit, prix) {
+    function sendOrderEmail(event) {
       event.preventDefault(); // Empêche la soumission du formulaire
 
-      const orderDetails = `Produit: ${nomProduit}\nPrix: ${prix}€`;
+      const customerName = document.getElementById('customerName').value.trim();
+      const customerAddress = document.getElementById('customerAddress').value.trim();
+      const customerEmail = document.getElementById('customerEmail').value.trim();
+      const additionalInfo = document.getElementById('additionalInfo').value.trim();
+
+      if (!customerName || !customerAddress || !customerEmail) {
+        alert('Veuillez remplir tous les champs obligatoires.');
+        return false;
+      }
+
+      if (!isValidEmail(customerEmail)) {
+        alert('Veuillez entrer une adresse e-mail valide.');
+        return false;
+      }
+
+      const nomProduit = document.querySelector('input[name="item_name"]').value;
+      const prix = document.querySelector('input[name="amount"]').value;
+      const orderDetails = `Nom: ${customerName}\nAdresse: ${customerAddress}\nE-mail: ${customerEmail}\nProduit: ${nomProduit}\nPrix: ${prix}€\n\nInformations supplémentaires :\n${additionalInfo}`;
 
       const mailtoLink1 = `mailto:nds-stincof@hotmail.com?subject=Nouvelle commande&body=${encodeURIComponent(orderDetails)}`;
       const mailtoLink2 = `mailto:thedshopbuy@gmail.com?subject=Nouvelle commande&body=${encodeURIComponent(orderDetails)}`;
@@ -183,46 +217,16 @@
       window.open(mailtoLink1);
       window.open(mailtoLink2);
 
-      // Rediriger vers la page de paiement PayPal
-      const paypalForm = document.createElement('form');
-      paypalForm.method = 'post';
-      paypalForm.action = 'https://www.paypal.com/cgi-bin/webscr';
-      paypalForm.target = '_top';
-
-      const cmdInput = document.createElement('input');
-      cmdInput.type = 'hidden';
-      cmdInput.name = 'cmd';
-      cmdInput.value = '_xclick';
-      paypalForm.appendChild(cmdInput);
-
-      const businessInput = document.createElement('input');
-      businessInput.type = 'hidden';
-      businessInput.name = 'business';
-      businessInput.value = 'oliel.lenny@gmail.com';
-      paypalForm.appendChild(businessInput);
-
-      const currencyCodeInput = document.createElement('input');
-      currencyCodeInput.type = 'hidden';
-      currencyCodeInput.name = 'currency_code';
-      currencyCodeInput.value = 'EUR';
-      paypalForm.appendChild(currencyCodeInput);
-
-      const itemNameInput = document.createElement('input');
-      itemNameInput.type = 'hidden';
-      itemNameInput.name = 'item_name';
-      itemNameInput.value = nomProduit;
-      paypalForm.appendChild(itemNameInput);
-
-      const amountInput = document.createElement('input');
-      amountInput.type = 'hidden';
-      amountInput.name = 'amount';
-      amountInput.value = prix;
-      paypalForm.appendChild(amountInput);
-
-      document.body.appendChild(paypalForm);
-      paypalForm.submit();
+      // Afficher le formulaire de paiement PayPal si les emails ont été envoyés avec succès
+      document.getElementById('paypalForm').style.display = 'block';
 
       return false; // Empêche la soumission du formulaire
+    }
+
+    // Fonction pour valider l'adresse e-mail
+    function isValidEmail(email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
     }
   </script>
 </body>
